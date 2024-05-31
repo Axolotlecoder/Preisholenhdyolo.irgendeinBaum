@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>W3.CSS Template</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://pyscript.net/alpha/pyscript.css" />
+<script defer src="https://pyscript.net/alpha/pyscript.js"></script>
+<style>
+</style>
+</head>
+<body>
+    <py-script>
+
+import requests
+from bs4 import BeautifulSoup
+import time
+from datetime import datetime
+
+# URL der Website, die überprüft werden soll
+url = "https://electronics.semaf.at/Raspberry-Pi-5-8GB-Board_1"
+
+# Dateipfad, um Preisänderungen zu protokollieren
+logfile = "preisprotokoll.txt"
+
+# Aktueller Preis, den wir überwachen
+current_price = None
+
+def get_price():
+    global current_price
+    try:
+        # Die Website abrufen
+        response = requests.get(url)
+        # HTML-Inhalt analysieren
+        soup = BeautifulSoup(response.text, 'html.parser')
+        # Den Preis extrahieren
+        price_element = soup.find("strong", class_="price")
+        price = price_element.text.strip()
+        # Prüfen, ob sich der Preis geändert hat
+        if current_price != price:
+            print("Preisänderung: " + price)
+            current_price = price
+            
+            # Aktuelles Datum und Uhrzeit erfassen
+            timestamp = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+            # Preisänderung zusammen mit Datum und Uhrzeit in das                 Protokolldatei schreiben
+            with open(logfile, "a") as f:
+                f.write(timestamp + " - " +  price + "\n")
+    except Exception as e:
+        print("Fehler beim Abrufen des Preises:", e)
+
+# Endlosschleife zum Überprüfen des Preises
+while True:
+    get_price()
+    # Wartezeit zwischen den Überprüfungen (z.B. alle 5 Minuten)
+    time.sleep(300)
+
+
+    </py-script>
+
+</body>
+</html>
